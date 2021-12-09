@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-
+@section('mytitle', 'Register')
 @section('content')
 <div class="container">
     <div class="row justify-content-center">

@@ -19,7 +19,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
+        'image',
         'password',
     ];
 
@@ -41,4 +43,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return url('storage/profile/' . $this->image);
+        } else {
+            return url('images/default.jpg');
+        }
+    }
+    public function getImageThumbUrlAttribute()
+    {
+        if ($this->image) {
+            return url('storage/profile/thumb/' . $this->image);
+        } else {
+            return url('images/default.jpg');
+        }
+    }
 }
