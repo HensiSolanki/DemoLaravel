@@ -27,8 +27,9 @@ class RedirectIfNotAdmin
         $redirectToRoute = $request->expectsJson() ? '' : route('admin.login');
 
         throw new AuthenticationException(
-            'Unauthenticated.', [$guard], $redirectToRoute
+            'Unauthenticated.',
+            [$guard],
+            $redirectToRoute
         );
     }
-
 }

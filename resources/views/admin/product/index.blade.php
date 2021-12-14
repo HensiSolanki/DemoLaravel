@@ -117,7 +117,6 @@
             title: 'Are you sure?',
             text: 'Once deleted, you will not be able to recover this file!',
             icon: 'warning',
-            html: true,
             showCancelButton: true,
             confirmButtonColor: "#DD6B55",
             confirmButtonText: "Yes, Remove!",

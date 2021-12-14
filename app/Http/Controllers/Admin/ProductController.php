@@ -14,7 +14,6 @@ use App\Http\Requests\Products\StoreProductRequest;
 
 class ProductController extends Controller
 {
-
     public function isProductnameAvailable(Request $request)
     {
         $products = Product::select('product_name')->where('product_name', '=', $request->get('product_name'))->first();
@@ -24,13 +23,14 @@ class ProductController extends Controller
             return "true";
         }
     }
-    public function isEditProductNameAvailable(Request $request, $id)
+    public function isEditProductNameAvailable(Request $request)
     {
-        $products = Product::select('product_name')->where('product_name', '=', $request->get('name'))->find($id);
-        if ($products) {
-            return "false";
-        } else {
+        $id = $request->id;
+        $products = Product::select('product_name')->where('product_name', '=', $request->get('product_name'))->where('id', '!=', $id)->count();
+        if ($products == 0) {
             return "true";
+        } else {
+            return "false";
         }
     }
     /**
@@ -140,9 +140,8 @@ class ProductController extends Controller
      */
     public function update(StoreProductRequest $request, $id)
     {
-
         $products = Product::find($id);
-        $products->product_name = $request->name;
+        $products->product_name = $request->product_name;
         $products->description = $request->detail;
 
         if ($request->hasFile('image')) {

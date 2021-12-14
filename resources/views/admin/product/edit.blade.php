@@ -10,15 +10,17 @@
                     <h2>Edit Product</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('admin.products.update',$products->id) }}" method="POST" enctype="multipart/form-data">
+                    <form id="edit-product" action="{{ route('admin.products.update',$products->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
+                        <input type="hidden" id="id" name="id" value="{{$products->id}}">
+
                         <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group row mb-3">
-                                    <label for="name"><b>Name:</b></label>
-                                    <input type="text" name="name" value="{!! old('name', $products->product_name) !!}" class="form-control @error('name') is-invalid @enderror" placeholder="Name">
-                                    @error('name')
+                                    <label for="product_name"><b>Name:</b></label>
+                                    <input type="text" name="product_name" value="{!! old('product_name', $products->product_name) !!}" class="form-control @error('product_name') is-invalid @enderror" placeholder="Name">
+                                    @error('product_name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
@@ -28,12 +30,7 @@
                             <div class="col-xs-12 col-sm-12 col-md-12">
                                 <div class="form-group row mb-3">
                                     <label for="name"><b>User Name:</b></label>
-                                    <input type="text" name="name" value={{ $products->username }} class="form-control" disabled>
-                                    @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                    @enderror
+                                    <input type="text" name="username" value="{{ $products->username }}" class="form-control" disabled>
                                 </div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12">
@@ -78,18 +75,20 @@
 @push('scripts')
 <script type="text/javascript">
     $(document).ready(function() {
-        $('#form').validate({
+        $('#edit-product').validate({
             rules: {
-                name: {
+                product_name: {
                     minlength: 6,
                     maxlength: 50,
                     required: true,
                     remote: {
                         url: "{!! route('admin.validateProduct') !!}",
                         type: "GET",
-                    },
-                    data: {
-                        product_name: $('#name').val(),
+                        data: {
+                            id: function() {
+                                return $('#id').val();
+                            }
+                        },
                     },
                 },
                 detail: {
@@ -97,9 +96,13 @@
                 },
             },
             messages: {
-                name: {
+                product_name: {
+                    required: "Product name is required",
                     remote: "Product Name already taken"
-                }
+                },
+                detail: {
+                    required: "Please Enter Product Details",
+                },
             },
             errorElement: 'span',
             errorPlacement: function(error, element) {
