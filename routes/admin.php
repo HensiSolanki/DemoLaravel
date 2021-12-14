@@ -16,6 +16,9 @@ Route::group(['middleware' => ['guest']], function () {
 
     // Products
     Route::get("/profile", 'HomeController@profile')->name("profile");
+
+    Route::get("/isProductnameAvailable", 'ProductController@isProductnameAvailable')->name('validate');
+    Route::get("/isEditProductNameAvailable", 'ProductController@isEditProductNameAvailable')->name('validateProduct');
     Route::resource('/products', 'ProductController');
     Route::get("/users", 'UsersController@index')->name("userIndex");
     Route::get("/users/view/{id}", 'UsersController@show')->name("userView");

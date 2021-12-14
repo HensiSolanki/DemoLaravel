@@ -60,7 +60,7 @@ class ProductController extends Controller
             $products = new Product;
             $products->image = $filename;
         }
-        $products->product_name = $request->name;
+        $products->product_name = $request->product_name;
         $products->description = $request->detail;
         $products->user_id = $request->user()->id;
         $products->save();

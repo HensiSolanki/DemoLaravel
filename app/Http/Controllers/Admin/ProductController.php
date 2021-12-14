@@ -3,15 +3,36 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\Products\StoreProductRequest;
 
 class ProductController extends Controller
 {
+
+    public function isProductnameAvailable(Request $request)
+    {
+        $products = Product::select('product_name')->where('product_name', '=', $request->get('product_name'))->first();
+        if ($products) {
+            return "false";
+        } else {
+            return "true";
+        }
+    }
+    public function isEditProductNameAvailable(Request $request, $id)
+    {
+        $products = Product::select('product_name')->where('product_name', '=', $request->get('name'))->find($id);
+        if ($products) {
+            return "false";
+        } else {
+            return "true";
+        }
+    }
     /**
      * Display a listing of the resource.
      *
@@ -42,7 +63,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('admin.product.create');
+        $users = User::all();
+
+        return view('admin.product.create', compact('users'));
     }
 
     /**
@@ -51,8 +74,12 @@ class ProductController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
+        $request->validate([
+            'user_id' => 'required',
+            'user_id.required' => 'Please Select a User'
+        ]);
         if ($request->hasFile('image')) {
 
             $image = $request->file('image')->store('products');
@@ -64,9 +91,9 @@ class ProductController extends Controller
             $products = new Product;
             $products->image = $filename;
         }
-        $products->product_name = $request->name;
+        $products->product_name = $request->product_name;
         $products->description = $request->detail;
-        $products->user_id = $request->user()->id;
+        $products->user_id = $request->user_id;
         $products->save();
 
         return redirect()->route('admin.products.index')
@@ -93,7 +120,14 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $products = Product::find($id);
+        $products = Product::select(
+            'products.id',
+            'products.image',
+            'products.product_name',
+            'products.description',
+            DB::raw("products.image AS image_thumb_url"),
+            'users.username'
+        )->join('users', 'users.id', '=', 'products.user_id')->find($id);
         return view('admin.product.edit', compact('products'));
     }
 
@@ -104,8 +138,9 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(StoreProductRequest $request, $id)
     {
+
         $products = Product::find($id);
         $products->product_name = $request->name;
         $products->description = $request->detail;
@@ -140,7 +175,22 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $products = Product::find($id);
-        $products->delete();
+        $product = Product::select(
+            'products.id',
+            'products.image',
+            'products.product_name',
+            'users.email'
+        )->join('users', 'users.id', '=', 'products.user_id')->find($id);
+
+        $email   = $product->email;
+        $name    = $product->product_name;
+
+        $data = array('email' => $email, 'name' => $name);
+        Mail::send('admin.users.mail', $data, function ($messages) use ($product) {
+            $messages->to($product->email);
+            $messages->subject("Hello Developer");
+        });
+
+        $product->delete();
     }
 }

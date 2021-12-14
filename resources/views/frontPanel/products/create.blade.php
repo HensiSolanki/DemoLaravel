@@ -17,8 +17,8 @@
                                 <div class="col-xs-12 col-sm-12 col-md-12">
                                     <div class="form-group row mb-3">
                                         <label for="name"><b>Name:</b></label>
-                                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="Name">
-                                        @error('name')
+                                        <input type="text" name="product_name" class="form-control @error('product_name') is-invalid @enderror" value="{{ old('product_name') }}" placeholder="Name">
+                                        @error('product_name')
                                             <span class="invalid-feedback" role="alert">
                                                 <strong>{{ $message }}</strong>
                                             </span>
