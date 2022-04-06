@@ -27,16 +27,16 @@ class StoreProductRequest extends FormRequest
     public function rules(Request $request)
     {
         if ($this->getMethod() == 'POST') {
+
             $rules = [
                 'product_name' => 'required|max:30|min:5|unique:products',
                 'detail' => 'required|max:255|min:10',
                 'image' => 'required|mimes:png,jpeg,gif,jpg',
-                // 'user_id' => 'required'
             ];
         } elseif ($this->getMethod() == 'PUT') {
             $rules = [
                 'product_name' => ['required', 'max:30', 'min:5', 'string', Rule::unique('products')->ignore($request->id)],
-                'detail' => 'required|max:255|min:10'
+                'detail' => 'required|max:1000|min:10'
             ];
         }
         return $rules;

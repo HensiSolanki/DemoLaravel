@@ -7,10 +7,12 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\Products\StoreProductRequest;
+use App\DataTables\ExportingDataTables;
 
 class ProductController extends Controller
 {
@@ -38,8 +40,13 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function export(Product $dataTable)
+    {
+        return $dataTable->render('export');
+    }
     public function index(Request $request)
     {
+        $users = User::all();
         if ($request->ajax()) {
             $products = Product::select(
                 'products.id',
@@ -50,10 +57,9 @@ class ProductController extends Controller
                 'users.username'
             )->join('users', 'users.id', '=', 'products.user_id');
 
-            return Datatables::of($products)
-                ->make(true);
+            return Datatables::of($products)->make(true);
         }
-        return view('admin.product.index');
+        return view('admin.product.index', compact('users'));
     }
 
     /**
@@ -76,28 +82,42 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $request->validate([
+        $input = $request->all();
+        $validator = Validator::make($request->all(), [
+            'product_name' => 'required|max:30|min:5|unique:products',
+            'detail' => 'required|max:255|min:10',
+            'image' => 'required|mimes:png,jpeg,gif,jpg',
             'user_id' => 'required',
-            'user_id.required' => 'Please Select a User'
+            'user_id.required' => 'Please Select a User',
         ]);
-        if ($request->hasFile('image')) {
-
-            $image = $request->file('image')->store('products');
-            $filename = basename($image);
-            $img = Image::make($request->file('image'))->resize(150, 150, function ($const) {
-                $const->aspectRatio();
-            })->save();
-            Storage::put('products/thumbnails/' . $filename, $img);
+        // $request->validate([
+        //     'user_id' => 'required',
+        //     'user_id.required' => 'Please Select a User'
+        // ]);
+        if ($validator->fails()) {
+            return response()->json([
+                "status" => 400,
+                "errors" => $validator->errors(),
+            ]);
+        } else {
             $products = new Product;
-            $products->image = $filename;
-        }
-        $products->product_name = $request->product_name;
-        $products->description = $request->detail;
-        $products->user_id = $request->user_id;
-        $products->save();
+            if ($request->hasFile('image')) {
 
-        return redirect()->route('admin.products.index')
-            ->with('success', 'Product created successfully.');
+                $image = $request->file('image')->store('products');
+                $filename = basename($image);
+                $img = Image::make($request->file('image'))->resize(150, 150, function ($const) {
+                    $const->aspectRatio();
+                })->save();
+                Storage::put('products/thumbnails/' . $filename, $img);
+                $products->image = $filename;
+            }
+            $products->product_name = $input['product_name'];
+            $products->description = $input['detail'];
+            $products->user_id = $input['user_id'];
+            $products->save();
+            return redirect()->route('admin.products.index')
+                ->with('success', 'Product created successfully.');
+        }
     }
 
     /**
@@ -106,9 +126,22 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $products = Product::find($id);
+        // $products = Product::find($id);
+        $products = Product::select(
+            'products.id',
+            'products.image',
+            'products.product_name',
+            'products.description',
+            DB::raw("products.image AS image_thumb_url"),
+            'users.username'
+        )->join('users', 'users.id', '=', 'products.user_id')->find($id);
+        if ($request->ajax()) {
+            return response()->json([
+                'products' =>  $products,
+            ]);
+        }
         return view('admin.product.show', compact('products'));
     }
 
@@ -118,7 +151,7 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $products = Product::select(
             'products.id',
@@ -128,6 +161,14 @@ class ProductController extends Controller
             DB::raw("products.image AS image_thumb_url"),
             'users.username'
         )->join('users', 'users.id', '=', 'products.user_id')->find($id);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'products' =>  $products,
+                'massege' => "edited"
+            ]);
+        }
+
         return view('admin.product.edit', compact('products'));
     }
 
@@ -180,15 +221,16 @@ class ProductController extends Controller
             'products.product_name',
             'users.email'
         )->join('users', 'users.id', '=', 'products.user_id')->find($id);
+        // dd($product);
 
-        $email   = $product->email;
-        $name    = $product->product_name;
+        // $email   = $product->email;
+        // $name    = $product->product_name;
 
-        $data = array('email' => $email, 'name' => $name);
-        Mail::send('admin.users.mail', $data, function ($messages) use ($product) {
-            $messages->to($product->email);
-            $messages->subject("Hello Developer");
-        });
+        // $data = array('email' => $email, 'name' => $name);
+        // Mail::send('admin.users.mail', $data, function ($messages) use ($product) {
+        //     $messages->to($product->email);
+        //     $messages->subject("Hello Developer");
+        // });
 
         $product->delete();
     }

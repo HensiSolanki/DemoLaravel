@@ -164,6 +164,8 @@ return [
         Yajra\DataTables\DataTablesServiceProvider::class,
         Bmatovu\MultiAuth\MultiAuthServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
+        Yajra\DataTables\ButtonsServiceProvider::class,
+
         /*
          * Package Service Providers...
          */

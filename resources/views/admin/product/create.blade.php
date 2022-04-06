@@ -73,6 +73,7 @@
     </div>
 </div>
 </div>
+</div>
 </form>
 @endsection
 @push('scripts')
@@ -102,7 +103,10 @@
             messages: {
                 product_name: {
                     remote: "Product Name already taken"
-                }
+                },
+                image: {
+                    required: "Please Select Image",
+                },
             },
             errorElement: 'span',
             errorPlacement: function(error, element) {
