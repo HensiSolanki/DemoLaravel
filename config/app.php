@@ -165,6 +165,9 @@ return [
         Bmatovu\MultiAuth\MultiAuthServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Yajra\DataTables\ButtonsServiceProvider::class,
+        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        Dingo\Api\Provider\LaravelServiceProvider::class,
+
 
         /*
          * Package Service Providers...
@@ -235,6 +238,9 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'DataTables' => Yajra\DataTables\Facades\DataTables::class,
         'Image' => Intervention\Image\Facades\Image::class,
+        'JWTAuth' => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'JWTFactory' => Tymon\JWTAuth\Facades\JWTFactory::class,
+
 
     ],
 

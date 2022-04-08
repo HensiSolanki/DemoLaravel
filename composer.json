@@ -7,6 +7,7 @@
     "require": {
         "php": "^7.3|^8.0",
         "bmatovu/multi-auth": "^10.4",
+        "dingo/api": "^3.0",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "intervention/image": "^2.7",
@@ -14,6 +15,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
+        "tymon/jwt-auth": "^1.0",
         "yajra/laravel-datatables-buttons": "^4.13",
         "yajra/laravel-datatables-oracle": "^9.18"
     },
